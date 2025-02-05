@@ -24,33 +24,40 @@
 int main(void)
 {
 	NB_init();
-	float cpt1=0.00 ;
-	float cpt2=0.00 ;
+	float MOT_D=0.00 ;
+	float MOT_G=0.00 ;
 
 	while (1)
 	{
 		if ( BP0 == 0)
 		{
-			cpt1=0.00;
-			cpt2=0.00;
+			MOT_D=0.00;
+			MOT_G=0.00;
 
 		}
 		if (BP1 == 0)
 		{
-			cpt1=cpt1+0.10;
+			MOT_D=MOT_D+0.10;
+			MOT_G=MOT_G-0.10;
 
 		}
-	    if (BP2 == 0)
+		if (BP2 == 0)
 		{
-			cpt2=cpt2+0.10;
+			MOT_D=1.00;
+			MOT_G=1.00;
 		}
-		PWM_write(PB_5,cpt1);
-		PWM_write(PB_4,cpt2);
+		if (BP3 == 0)
+		{
+			MOT_G=MOT_G+0.10;
+			MOT_D=MOT_D-0.10;
+		}
+		PWM_write(PB_5,MOT_D);
+		PWM_write(PB_4,MOT_G);
 		IHM_LCD_clear();
 		IHM_LCD_locate(0,0);
-		IHM_LCD_printf("vitesse = %4.2f",cpt1);
+		IHM_LCD_printf("vitesse = %4.2f",MOT_D);
 		IHM_LCD_locate(1,0);
-		IHM_LCD_printf("vitesse = %4.2f",cpt2);
+		IHM_LCD_printf("vitesse = %4.2f",MOT_G);
 		TIM_wait_ms(100);
 
 
