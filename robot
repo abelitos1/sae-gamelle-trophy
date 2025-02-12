@@ -140,6 +140,28 @@ void state (void)
 
 			break;
 
+                   case droit2 :
+
+			IHM_LCD_clear();
+			IHM_LCD_locate(0, 0);
+			IHM_LCD_printf("tourner droite");
+
+			MOT_D=0.200 ;
+			MOT_G=0.840 ;
+
+			break ;
+
+
+		case gauche2 :
+			IHM_LCD_clear();
+			IHM_LCD_locate(0, 0);
+			IHM_LCD_printf("tourner gauche");
+
+			MOT_D=0.600 ;
+			MOT_G=0.100;
+			
+			break;
+
 		case stop:
 
 			IHM_LCD_clear();
