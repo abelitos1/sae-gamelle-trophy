@@ -25,6 +25,7 @@
 /******************* PROTOTYPES DE FONCTIONS *********************************/
 
 void state (void);
+int CNYread (void);
 
 int read (void);
 /******************* PROGRAMME PRINCIPAL *************************************/
@@ -51,83 +52,16 @@ int main(void)
 
 	IHM_LCD_clear();
 	IHM_LCD_locate(0, 0);
-	IHM_LCD_printf("TP NBOARD");
+
 	NB_ADC_MUX_select(0);
 
 	while (1)
 	{
 
 		state ();
+		CNYread();
 		TIM_wait_ms(100);
-		//		IHM_LCD_clear();
-		//
-		//
-		//		NB_ADC_MUX_select(0);
-		//		CNY1=NB_ADC_read(PB_1);
-		//		IHM_LCD_locate(0, 0);
-		//		IHM_LCD_printf("%4d", CNY1);
-		//
-		//		if(CNY1<seuil){
-		//			GPIO_write (LED0,1) ;
-		//		}
-		//		else{
-		//			GPIO_write (LED0,0) ;
-		//		}
-		//
-		//		NB_ADC_MUX_select(1);
-		//		CNY2=NB_ADC_read(PB_1);
-		//		IHM_LCD_locate(0, 6);
-		//		IHM_LCD_printf("%4d", CNY2);
-		//
-		//		if(CNY2<seuil){
-		//			GPIO_write (LED1,1) ;
-		//		}
-		//		else{
-		//			GPIO_write (LED1,0) ;
-		//		}
-		//
-		//		NB_ADC_MUX_select(2);
-		//		CNY3=NB_ADC_read(PB_1);
-		//		IHM_LCD_locate(0,12);
-		//		IHM_LCD_printf("%4d", CNY3);
-		//
-		//		if(CNY3<seuil){
-		//			GPIO_write (LED2,1) ;
-		//		}
-		//		else{
-		//			GPIO_write (LED2,0) ;
-		//		}
-		//
-		//		NB_ADC_MUX_select(3);
-		//		CNY4=NB_ADC_read(PB_1);
-		//		IHM_LCD_locate(1, 0);
-		//		IHM_LCD_printf("%4d", CNY4);
-		//
-		//		if(CNY4<seuil){
-		//			GPIO_write (LED3,1) ;
-		//		}
-		//		else{
-		//			GPIO_write (LED3,0) ;
-		//		}
-		//
-		//		NB_ADC_MUX_select(4);
-		//		CNY5=NB_ADC_read(PB_1);
-		//		IHM_LCD_locate(1, 6);
-		//		IHM_LCD_printf("%4d", CNY5);
-		//
-		//		if(CNY5<seuil){
-		//			GPIO_write (LED4,1) ;
-		//		}
-		//		else{
-		//			GPIO_write (LED4,0) ;
-		//		}
-		//
-		//		IHM_LCD_locate(1, 12);
-		//		IHM_LCD_printf("%4d", seuil);
-		//
-		//		if (BP0==0){
-		//			seuil+=100;
-		//		}
+
 		//
 		//		if (BP2==0){
 		//			seuil-=100;
@@ -162,9 +96,7 @@ void state (void)
 	{
 		case depart:
 
-			IHM_LCD_clear();
-			IHM_LCD_locate(0, 0);
-			IHM_LCD_printf("depart");
+
 
 			MOT_D=0.00 ;
 			MOT_G=0.00 ;
@@ -188,14 +120,15 @@ void state (void)
 
 			break;
 
+
 		case devant:
 
 			IHM_LCD_clear();
 			IHM_LCD_locate(0, 0);
 			IHM_LCD_printf("devant");
 
-			MOT_D=0.70 ;
-			MOT_G=0.70 ;
+			MOT_D=0.600 ;
+			MOT_G=0.840 ;
 
 			PWM_write(PB_5,MOT_D);
 			PWM_write(PB_4,MOT_G);
@@ -224,11 +157,77 @@ void state (void)
 	}
 }
 
+int CNYread(void)
+{
+
+	int CNY1,CNY2,CNY3,CNY4,CNY5;
+	int seuil = 2000;
+			NB_ADC_MUX_select(0);
+			CNY1=NB_ADC_read(PB_1);
+
+
+			if(CNY1<seuil){
+				GPIO_write (LED0,1) ;
+			}
+			else{
+				GPIO_write (LED0,0) ;
+			}
+
+			NB_ADC_MUX_select(1);
+			CNY2=NB_ADC_read(PB_1);
+			IHM_LCD_locate(0, 6);
+			IHM_LCD_printf("%4d", CNY2);
+
+			if(CNY2<seuil){
+				GPIO_write (LED1,1) ;
+			}
+			else{
+				GPIO_write (LED1,0) ;
+			}
+
+			NB_ADC_MUX_select(2);
+			CNY3=NB_ADC_read(PB_1);
+			IHM_LCD_locate(0,12);
+			IHM_LCD_printf("%4d", CNY3);
+
+			if(CNY3<seuil){
+				GPIO_write (LED2,1) ;
+			}
+			else{
+				GPIO_write (LED2,0) ;
+			}
+
+			NB_ADC_MUX_select(3);
+			CNY4=NB_ADC_read(PB_1);
+			IHM_LCD_locate(1, 0);
+			IHM_LCD_printf("%4d", CNY4);
+
+			if(CNY4<seuil){
+				GPIO_write (LED3,1) ;
+			}
+			else{
+				GPIO_write (LED3,0) ;
+			}
+
+			NB_ADC_MUX_select(4);
+			CNY5=NB_ADC_read(PB_1);
+			IHM_LCD_locate(1, 6);
+			IHM_LCD_printf("%4d", CNY5);
+
+			if(CNY5<seuil){
+				GPIO_write (LED4,1) ;
+			}
+			else{
+				GPIO_write (LED4,0) ;
+			}
+
+			return CNY1,CNY2,CNY3,CNY4,CNY5;
+}
+
 //int read (void)
 //{
 //
 //}
 
 /* Fonction inversion LED ****************************************************/
-
 
