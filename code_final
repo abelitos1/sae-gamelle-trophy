@@ -1,0 +1,261 @@
+/******************* BIBLIOTHEQUES *******************************************/
+#include "nboard.h"
+#include "stdbool.h"
+/******************* CONSTANTES SYMBOLIQUES **********************************/
+// Bouton
+#define lecture_jack GPIO_read(PB_6)
+#define FIN_COURSE  GPIO_read(PB_7)
+#define JACK_ENLEVE 0
+/******************* PROTOTYPES DE FONCTIONS *********************************/
+void Capteur();
+void automate(void);
+void cut();
+
+#define LED0 PB_3
+#define LED1 PA_7
+#define LED2 PA_6
+#define LED3 PA_5
+#define LED4 PA_3
+#define LED5 PA_1
+#define LED6 PA_0
+/******************* PROGRAMME PRINCIPAL *************************************/
+//Initialisation des variables globales
+//CNY70
+uint16_t CRACC;
+uint16_t CEG;
+uint16_t CG;
+uint16_t CD;
+uint16_t CED;
+
+
+uint16_t seuilCNY =1000;
+
+uint8_t arret=0;
+
+//rapport cyclique
+float MOT_G = 0;
+float MOT_D = 0;
+
+int main(void)
+{
+	NB_init();  // Initialisation de la carte
+	IHM_LCD_clear(); // reset affichage
+
+	//On s'assure que les moteurs sont initialement éteints
+	PWM_write (PB_5, MOT_G) ;
+	PWM_write (PB_4, MOT_D) ;
+	TIM_wait_ms(200);
+	while (1)
+	{
+		Capteur();
+		automate();
+	}
+}
+
+
+//CODE QUI GERE LES MOTEURSS EN FONCTION DES CAPTEURS
+void automate()
+{
+	typedef enum {STOP,STOPTOTAL, DEVANT, tourne_d, tourne_g} type_etat;
+
+	static type_etat etat_futur = STOP;
+	type_etat etat_courant;
+
+	etat_courant = etat_futur;
+
+	//je réfléchis
+	switch (etat_courant)
+	{
+		case STOP :  // moteur eteint
+			if ( lecture_jack == JACK_ENLEVE)   //verifie si le jack est mis ou que fin a eté appuyé
+			{
+				etat_futur = DEVANT;
+			}
+			break;
+		case STOPTOTAL :  // moteur eteint
+
+		break;
+
+		case DEVANT: //les deux moteurs avancent a la meme vitesse
+			//tourne à droite
+			if (CED > seuilCNY)
+			{
+				etat_futur= tourne_d;
+			}
+			//tourne à gauche
+			if (CEG > seuilCNY)
+			{
+				etat_futur= tourne_g;
+			}
+			if (FIN_COURSE==1){
+				etat_futur = STOPTOTAL;
+			}
+
+			break;
+
+		case  tourne_d:  // juste capteur de gauche sur la ligne, donc tourner a droite
+			// va tt droit car capteur centraux
+			if (CD > seuilCNY) //CG et CD
+			{
+				etat_futur= DEVANT;
+			}
+
+			if (FIN_COURSE==1){
+							etat_futur = STOPTOTAL;
+						}
+
+			break;
+
+		case  tourne_g :  // juste capteur de droite sur la ligne, donc tourner a gauche
+			// va tt droit car capteur centraux
+			if (CG > seuilCNY) //CG et CD
+			{
+				etat_futur= DEVANT;
+			}
+
+			if (FIN_COURSE==1){
+							etat_futur = STOPTOTAL;
+						}
+
+			break;
+	}
+
+	//RC 0.5 et 0.2
+	//SWITCH SERVANT A CHANGER LES RC EN FONCTION DES COLMBINAISONS DE CAPTEURS ACTIFS
+	//j'agis
+	switch(etat_courant)
+	{
+
+		case STOP :  // moteur eteint
+			MOT_G = 0.00;
+			MOT_D = 0.00;
+			IHM_LCD_locate(0, 0);
+			IHM_LCD_printf("STOP   ");
+			break;
+
+		case STOPTOTAL :  // moteur eteint
+			MOT_G = 0.00;
+			MOT_D = 0.00;
+			IHM_LCD_locate(0, 0);
+			IHM_LCD_printf("FINI   ");
+			break;
+
+		case DEVANT: //les deux moteurs avancent a la meme vitesse
+			MOT_G = 0.8;
+			MOT_D = 0.8;
+			IHM_LCD_locate(0, 0);
+			IHM_LCD_printf("AVANCE   ");
+			break;
+
+		case  tourne_d:  // juste capteur de gauche sur la ligne, donc tourner a droite
+			MOT_G = 0.70; //05
+			MOT_D = 0.15; //70
+			IHM_LCD_locate(0, 0);
+			IHM_LCD_printf("DROITE   ");
+			break;
+
+		case  tourne_g :  // juste capteur de droite sur la ligne, donc tourner a gauche
+			MOT_G = 0.15; //07
+			MOT_D = 0.70; //05
+			IHM_LCD_locate(0, 0);
+			IHM_LCD_printf("GAUCHE   ");
+			break;
+
+	}
+
+	PWM_write (PB_5,MOT_G);
+	PWM_write (PB_4, MOT_D);
+}
+
+
+//CODE CAPTEURS
+
+void Capteur()
+{
+	//capteur 1
+	NB_ADC_MUX_select(0);
+	//1us d'attente
+	TIM_wait_us(1);
+	CRACC=NB_ADC_read(PB_1);
+
+
+
+	//capteur 2
+	NB_ADC_MUX_select(1);
+	TIM_wait_us(1);
+	CEG=NB_ADC_read(PB_1);
+
+
+	//capteur 3
+	NB_ADC_MUX_select(2);
+	TIM_wait_us(1);
+	CG=NB_ADC_read(PB_1);
+
+	//capteur 4
+	NB_ADC_MUX_select(3);
+	TIM_wait_us(1);
+	CD=NB_ADC_read(PB_1);
+
+
+	//capteur 5
+	NB_ADC_MUX_select(4);
+	TIM_wait_us(1);
+	CED=NB_ADC_read(PB_1);
+
+
+	if(CRACC>seuilCNY){
+		GPIO_write (LED0,1) ;
+	}
+	else{
+		GPIO_write (LED0,0) ;
+	}
+
+
+	if(CEG>seuilCNY){
+		GPIO_write (LED1,1) ;
+	}
+	else{
+		GPIO_write (LED1,0) ;
+	}
+
+
+	if(CG>seuilCNY){
+		GPIO_write (LED2,1) ;
+	}
+	else{
+		GPIO_write (LED2,0) ;
+	}
+
+
+	if(CD>seuilCNY){
+		GPIO_write (LED3,1) ;
+	}
+	else{
+		GPIO_write (LED3,0) ;
+	}
+
+
+	if(CED>seuilCNY){
+		GPIO_write (LED4,1) ;
+	}
+	else{
+		GPIO_write (LED4,0) ;
+	}
+
+	if (FIN_COURSE==1){
+		GPIO_write (LED5,1) ;
+	}
+	else{
+		GPIO_write (LED5,0) ;
+	}
+
+
+	if (lecture_jack==1){
+			GPIO_write (LED6,1) ;
+		}
+		else{
+			GPIO_write (LED6,0) ;
+		}
+}
+
+
