@@ -1,0 +1,99 @@
+/**
+ ******************************************************************************
+ * @file	nb_api.c
+ * @author	Bruno LARNAUDIE, Pauline MICHEL
+ * @brief	Bibliothèque d'initialisation de la NBoard.
+ * 			Cette bibliothèque permet de :
+ *			+ initialiser la NBoard selon votre application (en TP SN, en SAE
+ *			robot, ...).
+ *
+ ******************************************************************************
+ */
+
+#include "nboard.h"
+
+/**
+ * @brief	Initialise la NBoard.
+ * @param
+ * @retval
+ */
+void NB_init(void)
+{
+	/******************* NE PAS TOUCHER **************************************/
+
+	/* Initialisations toujours valables (fait appel aux fonctions auto-
+	 * générées) */
+	HAL_Init();
+	SystemClock_Config();
+
+	MX_GPIO_Init();
+	MX_ADC1_Init();
+	MX_CAN_Init();
+	MX_DAC1_Init();
+	MX_TIM2_Init();
+
+	/*************************************************************************/
+
+	/******************* A REMPLIR : ENTREES NUMERIQUES **********************/
+
+	GPIO_input(PA_9, PULL_UP);
+	GPIO_input(PA_10, PULL_UP);
+	GPIO_input(PB_0, PULL_UP);
+	GPIO_input(PB_7, PULL_DOWN);
+	GPIO_input(PB_6, PULL_DOWN);
+
+	/*************************************************************************/
+
+	/******************* A REMPLIR : SORTIES NUMERIQUES **********************/
+
+	GPIO_output(PB_3);
+
+	GPIO_output(PA_7);
+
+	GPIO_output(PA_6);
+
+	GPIO_output(PA_5);
+
+	GPIO_output(PA_3);
+
+	GPIO_output(PA_1);
+
+	GPIO_output(PA_0);
+
+	GPIO_output(PF_0);
+	GPIO_output(PF_1);
+	GPIO_output(PA_8);// LED0
+
+	/*************************************************************************/
+
+	/******************* A REMPLIR : BUS SORTIES NUMERIQUES ******************/
+
+
+
+	/*************************************************************************/
+
+	/******************* A REMPLIR : ENTREES DE SELECTION DU MUX *************/
+
+	NB_ADC_input (PB_1);
+
+	/*************************************************************************/
+
+	/******************* A REMPLIR : ENTREES ANALOGIQUES *********************/
+
+
+
+	/*************************************************************************/
+
+	/******************* A REMPLIR : SORTIES ANALOGIQUES *********************/
+
+
+
+	/*************************************************************************/
+
+	/******************* A REMPLIR : PWM *************************************/
+
+	PWM_output (PB_5,20000) ;
+	PWM_output (PB_4,20000) ;
+
+	/*************************************************************************/
+}
